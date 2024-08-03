@@ -1,1 +1,16 @@
+__pycache__/
+*.py[cod]
+_*
+*.html
+*.3dmbak
+events.out.tfevents.*
+
 debugvisualizer/
+
+deep_sdf/data/raw/
+deep_sdf/data/preprocessed/
+deep_sdf/runs/2024-03-27_22-28-06/
+deep_sdf/runs/2024-03-24_12-40-26/originals
+deep_sdf/runs/2024-03-24_12-40-26/synthesized
+deep_sdf/runs/2024-03-24_12-40-26/infinite_synthesis
+deep_sdf/runs/2024-03-24_12-40-26/visualized

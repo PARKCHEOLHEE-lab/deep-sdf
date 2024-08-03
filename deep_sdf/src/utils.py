@@ -1,7 +1,9 @@
+import time
 import trimesh
 import numpy as np
 import matplotlib.pyplot as plt
 
+from typing import Callable
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
@@ -46,3 +48,40 @@ def plot_mesh(mesh: trimesh.Trimesh, points: np.ndarray = None, only_points: boo
             ax.set_zlim(mid[2] - max_range, mid[2] + max_range)
 
     plt.show()
+
+
+def runtime_calculator(func: Callable) -> Callable:
+    """A decorator function for measuring the runtime of another function.
+
+    Args:
+        func (Callable): Function to measure
+
+    Returns:
+        Callable: Decorator
+    """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = end_time - start_time
+        print(f"The function {func.__name__} took {runtime} seconds to run.")
+        return result
+
+    return wrapper
+
+
+def add_debugvisualizer(globals_dict: dict) -> None:
+    """Add libs for debugging to the global namespace.
+
+    Args:
+        globals_dict (dict): The global namespace.
+    """
+
+    from debugvisualizer.debugvisualizer import Plotter
+    from shapely import geometry
+    import trimesh
+
+    globals_dict["Plotter"] = Plotter
+    globals_dict["geometry"] = geometry
+    globals_dict["trimesh"] = trimesh

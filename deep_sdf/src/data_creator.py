@@ -2,13 +2,13 @@ import os
 import ray
 import trimesh
 import numpy as np
-import commonutils
 import multiprocessing
 import point_cloud_utils as pcu
 
 from tqdm import tqdm
 from typing import List, Union
-from deepSDF.config import Configuration
+from deep_sdf.src import utils
+from deep_sdf.src.config import Configuration
 
 
 class DataCreatorHelper:
@@ -36,7 +36,7 @@ class DataCreatorHelper:
         """
 
         if save_html:
-            commonutils.add_debugvisualizer(globals())
+            utils.commonutils.add_debugvisualizer(globals())
 
         meshes = []
         max_length = 0
@@ -227,9 +227,9 @@ class DataCreator(DataCreatorHelper):
         self.n_volume_sampling = n_volume_sampling
 
         if self.is_debug_mode:
-            commonutils.add_debugvisualizer(globals())
+            utils.add_debugvisualizer(globals())
 
-    @commonutils.runtime_calculator
+    @utils.runtime_calculator
     def create(self) -> None:
         """Create data for training sdf decoder"""
 

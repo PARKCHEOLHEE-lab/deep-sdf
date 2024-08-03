@@ -3,7 +3,6 @@ import time
 import torch
 import datetime
 import numpy as np
-import commonutils
 import torch.nn as nn
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -13,9 +12,10 @@ from typing import Tuple, Dict
 from torch.nn.modules.loss import _Loss
 from torch.optim import lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
-from deepSDF.config import Configuration
 from torch.utils.data import Dataset, DataLoader, random_split
-from deepSDF.reconstruct import Reconstructor
+from deep_sdf.src import utils
+from deep_sdf.src.config import Configuration
+from deep_sdf.src.reconstruct import Reconstructor
 
 
 class SDFdataset(Dataset, Configuration):
@@ -149,7 +149,7 @@ class SDFdecoderTrainer(Reconstructor, Configuration):
         self.is_valid_pre_trained_path = os.path.isdir(pre_trained_path) and len(os.listdir(pre_trained_path)) > 0
 
         if self.is_debug_mode:
-            commonutils.add_debugvisualizer(globals())
+            utils.add_debugvisualizer(globals())
 
         self.set_seed(seed)
 

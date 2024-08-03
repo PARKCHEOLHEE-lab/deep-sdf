@@ -1,3 +1,4 @@
+import os
 import torch
 import random
 import numpy as np
@@ -6,9 +7,14 @@ from typing import Tuple
 
 
 class DataConfiguration:
-    RAW_DATA_PATH = "deepSDF/data/raw-skyscrapers"
-    SAVE_DATA_PATH = "deepSDF/data/preprocessed-skyscrapers"
-    SAVE_DATA_PATH_DYNAMIC_SAMPLED = "deepSDF/data/preprocessed-skyscrapers-dynamic-sampled"
+    RAW_DATA_PATH = os.path.abspath(os.path.join(__file__, "../../data/raw-skyscrapers"))
+    SAVE_DATA_PATH = os.path.abspath(os.path.join(__file__, "../../data/preprocessed-skyscrapers"))
+    SAVE_DATA_PATH_DYNAMIC_SAMPLED = os.path.abspath(
+        os.path.join(__file__, "../../data/preprocessed-skyscrapers-dynamic-sampled")
+    )
+    # RAW_DATA_PATH = "deep_sdf/data/raw-skyscrapers"
+    # SAVE_DATA_PATH = "deep_sdf/data/preprocessed-skyscrapers"
+    # SAVE_DATA_PATH_DYNAMIC_SAMPLED = "deep_sdf/data/preprocessed-skyscrapers-dynamic-sampled"
 
     N_TOTAL_SAMPLING = 64**3
     N_SURFACE_SAMPLING_RATIO = 0.3
@@ -83,7 +89,7 @@ class Configuration(DataConfiguration, ModelConfiguration):
     DEFAULT_SEED = 777
     SEED_SET = None
 
-    LOG_DIR = "deepSDF/runs"
+    LOG_DIR = "deep_sdf/runs"
 
     @staticmethod
     def set_seed(seed: int = DEFAULT_SEED):

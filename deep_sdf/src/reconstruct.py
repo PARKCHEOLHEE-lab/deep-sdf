@@ -7,7 +7,7 @@ import point_cloud_utils as pcu
 
 from tqdm import tqdm
 from typing import Tuple
-from deepSDF.config import Configuration
+from deep_sdf.src.config import Configuration
 
 
 class ReconstructorHelper:

@@ -2,7 +2,6 @@ import os
 import time
 import torch
 import random
-import commonutils
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -10,10 +9,11 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from collections import deque
 from typing import List, Tuple
-from deepSDF.model import SDFdecoder
 from IPython.display import clear_output
-from deepSDF.config import Configuration
-from deepSDF.reconstruct import ReconstructorHelper
+from deep_sdf.src.model import SDFdecoder
+from deep_sdf.src import utils
+from deep_sdf.src.config import Configuration
+from deep_sdf.src.reconstruct import ReconstructorHelper
 
 
 class SynthesizerHelper:
@@ -120,7 +120,7 @@ class Synthesizer(ReconstructorHelper, SynthesizerHelper, Configuration):
         return selected_indices, synthesized_latent_code
 
     @torch.inference_mode()
-    @commonutils.runtime_calculator
+    @utils.runtime_calculator
     def synthesize(
         self,
         sdf_decoder: SDFdecoder,

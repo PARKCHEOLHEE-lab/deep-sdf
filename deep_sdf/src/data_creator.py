@@ -1,12 +1,11 @@
 import os
-import ray
 import trimesh
 import numpy as np
 import multiprocessing
 import point_cloud_utils as pcu
 
 from tqdm import tqdm
-from typing import List, Union
+from typing import Union, Tuple
 from deep_sdf.src import utils
 from deep_sdf.src.config import Configuration
 
@@ -16,62 +15,59 @@ class DataCreatorHelper:
     CENTER = "center"
     CENTER_WITHOUT_Z = "center_without_z"
 
+    TYPES = Union[MIN_BOUND, CENTER, CENTER_WITHOUT_Z]
+
     @staticmethod
-    @ray.remote
-    def calculate_max_length(
-        paths: List[str],
+    def load_mesh_and_compute_max_norm(
+        path: str,
         map_z_to_y: bool = False,
         check_watertight: bool = True,
-        translate_mode: Union[MIN_BOUND, CENTER, CENTER_WITHOUT_Z] = CENTER_WITHOUT_Z,
+        translate_mode: TYPES = CENTER_WITHOUT_Z,
         save_html: bool = False,
-    ) -> float:
+    ) -> Tuple[trimesh.Trimesh, float]:
         """
-        Calculate the maximum length of the given mesh.
+        Load mesh and compute max norm
 
         Args:
-            paths (List[str]): Paths of the meshes to calculate the maximum length.
+            path (str): mesh path
+            map_z_to_y (bool, optional): swap y and z axes. Defaults to False.
+            check_watertight (bool, optional): ensure the mesh is watertight. Defaults to True.
+            translate_mode (Union[MIN_BOUND, CENTER, CENTER_WITHOUT_Z], optional): Defaults to CENTER_WITHOUT_Z.
+            save_html (bool, optional): Defaults to False.
 
         Returns:
-            float: The maximum length of the given mesh
+            Tuple[trimesh.Trimesh, float]: mesh, max norm
         """
+
+        print(path, "\n")
+
+        mesh = DataCreatorHelper.load_mesh(
+            path,
+            normalize=False,
+            map_z_to_y=map_z_to_y,
+            check_watertight=check_watertight,
+            translate_mode=translate_mode,
+        )
+
+        if not mesh.is_watertight:
+            print(f"{path} is not watertight")
+
+        length = np.max(np.linalg.norm(mesh.vertices, axis=1))
 
         if save_html:
             utils.commonutils.add_debugvisualizer(globals())
 
-        meshes = []
-        max_length = 0
+            save_name = os.path.basename(path).replace(".obj", ".html")
+            print(f"saving: {save_name}")
 
-        for path in paths:
-            mesh = DataCreatorHelper.load_mesh(
-                path,
-                normalize=False,
-                map_z_to_y=map_z_to_y,
-                check_watertight=check_watertight,
-                translate_mode=translate_mode,
-            )
+            globals()["Plotter"](
+                mesh,
+                globals()["geometry"].Point(mesh.vertices[np.argmax(np.linalg.norm(mesh.vertices, axis=1))]),
+                globals()["geometry"].Point(0, 0),
+                map_z_to_y=False,
+            ).save(save_name)
 
-            if not mesh.is_watertight:
-                print(f"{path} is not watertight")
-                continue
-
-            length = np.max(np.linalg.norm(mesh.vertices, axis=1))
-            if length > max_length:
-                max_length = length
-
-            meshes.append(mesh)
-
-            if save_html:
-                save_name = os.path.basename(path).replace(".obj", ".html")
-                print(f"saving: {save_name}")
-
-                globals()["Plotter"](
-                    mesh,
-                    globals()["geometry"].Point(mesh.vertices[np.argmax(np.linalg.norm(mesh.vertices, axis=1))]),
-                    globals()["geometry"].Point(0, 0),
-                    map_z_to_y=False,
-                ).save(save_name)
-
-        return meshes, max_length
+        return mesh, length
 
     @staticmethod
     def get_normalized_mesh(_mesh: trimesh.Trimesh, max_length: float = None) -> trimesh.Trimesh:
@@ -154,7 +150,7 @@ class DataCreatorHelper:
         map_z_to_y: bool = False,
         check_watertight: bool = True,
         max_length: float = None,
-        translate_mode: Union[MIN_BOUND, CENTER, CENTER_WITHOUT_Z] = CENTER_WITHOUT_Z,
+        translate_mode: TYPES = CENTER_WITHOUT_Z,
     ) -> trimesh.Trimesh:
         """Load mesh data from .obj file
 
@@ -230,23 +226,36 @@ class DataCreator(DataCreatorHelper):
             utils.add_debugvisualizer(globals())
 
     @utils.runtime_calculator
+    def _load_meshes_and_compute_max_norm(
+        self,
+        map_z_to_y: bool = False,
+        check_watertight: bool = True,
+        translate_mode: DataCreatorHelper.TYPES = DataCreatorHelper.CENTER_WITHOUT_Z,
+        save_html: bool = False,
+    ):
+        paths = [
+            os.path.join(self.raw_data_path, file) for file in os.listdir(self.raw_data_path) if file.endswith(".obj")
+        ]
+
+        tasks = [(path, map_z_to_y, check_watertight, translate_mode, save_html) for path in paths]
+        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+            results = pool.starmap(DataCreatorHelper.load_mesh_and_compute_max_norm, tasks)
+
+        meshes, lengths = zip(*results)
+        max_length = max(lengths)
+
+        return meshes, max_length
+
+    @utils.runtime_calculator
     def create(self) -> None:
         """Create data for training sdf decoder"""
 
         if not os.path.exists(self.save_path):
             os.mkdir(self.save_path)
 
-        paths = [
-            os.path.join(self.raw_data_path, file) for file in os.listdir(self.raw_data_path) if file.endswith(".obj")
-        ]
-
-        ray.init(num_cpus=multiprocessing.cpu_count(), ignore_reinit_error=True)
-
-        futures = self.calculate_max_length.remote(
-            paths, map_z_to_y=True, check_watertight=True, translate_mode=self.translate_mode, save_html=False
+        meshes, max_length = self._load_meshes_and_compute_max_norm(
+            map_z_to_y=True, check_watertight=True, translate_mode=self.translate_mode, save_html=False
         )
-
-        meshes, max_length = ray.get(futures)
 
         cls = 0
         for mesh in tqdm(meshes, desc="Preprocessing"):
@@ -285,5 +294,3 @@ class DataCreator(DataCreatorHelper):
             )
 
             cls += 1
-
-        ray.shutdown()

@@ -1,16 +1,14 @@
 # DeepSDF
 
 Simple implementation of the paper [DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation.](https://arxiv.org/pdf/1901.05103) with the skyscrapers data. Leveraging the Deep Signed Distance Functions model with latent vectors, this project aims to build the algorithm that can `synthesize` infinite number of skyscrapers similar to trained data.
-
-<br>
-
 The detailed process for this project is archived __[here](https://parkcheolhee-lab.github.io/synthesized-skyscrapers/).__
 
 <br>
 
-![](deep_sdf/assets/synthesis.gif)
+<p align="center">
+  <img src="deep_sdf/assets/synthesis.gif">
+</p>
 
-<br>
 
 # Installation
 This repository uses the [image](/.devcontainer/Dockerfile) named `nvcr.io/nvidia/pytorch:23.10-py3` for running devcontainer.

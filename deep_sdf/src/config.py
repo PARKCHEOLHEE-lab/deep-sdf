@@ -12,9 +12,6 @@ class DataConfiguration:
     SAVE_DATA_PATH_DYNAMIC_SAMPLED = os.path.abspath(
         os.path.join(__file__, "../../data/preprocessed-skyscrapers-dynamic-sampled")
     )
-    # RAW_DATA_PATH = "deep_sdf/data/raw-skyscrapers"
-    # SAVE_DATA_PATH = "deep_sdf/data/preprocessed-skyscrapers"
-    # SAVE_DATA_PATH_DYNAMIC_SAMPLED = "deep_sdf/data/preprocessed-skyscrapers-dynamic-sampled"
 
     N_TOTAL_SAMPLING = 64**3
     N_SURFACE_SAMPLING_RATIO = 0.3

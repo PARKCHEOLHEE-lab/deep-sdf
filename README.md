@@ -7,8 +7,9 @@ The detailed process for this project is archived __[here](https://parkcheolhee-
 
 <p align="center">
   <img src="deep_sdf/assets/synthesis.gif">
+  <br><br>
+  <i>Synthesized data</i>
 </p>
-
 
 # Installation
 This repository uses the [image](/.devcontainer/Dockerfile) named `nvcr.io/nvidia/pytorch:23.10-py3` for running devcontainer.

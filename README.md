@@ -8,7 +8,7 @@ The detailed process for this project is archived __[here](https://parkcheolhee-
 <p align="center">
   <img src="deep_sdf/assets/synthesis.gif">
   <br><br>
-  <i>Synthesized data</i>
+  <i>Synthesized data with deepSDF model</i>
 </p>
 
 # Installation
